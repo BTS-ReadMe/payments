@@ -1,22 +1,37 @@
 server:
-  port: 0
+  port: 8080
 
 spring:
+
   application:
-    name: payments-service
+    name: user-service
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: rootym
-    url: jdbc:mysql://127.0.0.1:3306/msa_test
-    password: '1234'
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect
-        format_sql: 'true'
-    hibernate:
-      ddl-auto: update
-    show-sql: 'true'
+    username: root
+    password: 1234
+    url: jdbc:mysql://localhost:3306/user
+
+  security:
+    payment:
+      client:
+        registration:
+          kakao:
+            client-name: kakao
+            client-id: cd2447cf90f5929ed98bc599d51f323d
+            client-secret: FEcBzqUhgg02OgA3R58yYXsU4Wb7TgGR
+            redirect-uri: http://localhost:8080
+            authorization-grant-type: authorization_code
+            scope:
+            #              - account_email
+            #              - profile_nickname
+            #              - profile_image
+            client-authentication-method: POST
+        provider:
+          kakao:
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+  #            user-name-attribute: id
 
 eureka:
   instance:
@@ -25,4 +40,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://10.10.10.190:8761/eureka
+      defaultZone: http://43.200.189.164:8761/eureka
