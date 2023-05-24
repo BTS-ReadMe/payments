@@ -1,22 +1,9 @@
 server:
-  port: 0
+  port: 8080
 
 spring:
   application:
-    name: payments-service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: rootym
-    url: jdbc:mysql://127.0.0.1:3306/msa_test
-    password: '1234'
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect
-        format_sql: 'true'
-    hibernate:
-      ddl-auto: update
-    show-sql: 'true'
+    name: users-service
 
 eureka:
   instance:
@@ -25,4 +12,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://10.10.10.190:8761/eureka
+      defaultZone: http://43.200.189.164:8761/eureka

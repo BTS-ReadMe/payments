@@ -1,0 +1,103 @@
+package com.readme.payments.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.readme.payments.requestObject.RequestReady;
+import com.readme.payments.responseObject.Message;
+import com.readme.payments.responseObject.ResponseReady;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class PaymentsServiceImpl implements PaymentsService {
+
+    @Value("${payment.key.cid}")
+    private String CID;
+
+    @Value("${payment.key.app_admin_key}")
+    private String APP_ADMIN_KEY;
+
+    @Value("${payment.redirect_url.approval_url}")
+    private String APPROVAL_URL;
+
+    @Value("${payment.redirect_url.cancel_url}")
+    private String CANCEL_URL;
+
+    @Value("${payment.redirect_url.fail_url}")
+    private String FAIL_URL;
+
+    @Value("${payment.provider.ready_uri}")
+    private String READY_URI;
+
+    @Override
+    public ResponseEntity<Message<ResponseReady>> purchaseItem(RequestReady requestReady)
+        throws JsonProcessingException {
+
+        return ready(requestReady);
+    }
+
+    public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady)
+        throws JsonProcessingException {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("cid", CID);
+        body.add("partner_order_id", "1");
+        body.add("partner_user_id", requestReady.getUuid());
+
+        Long novelId = requestReady.getNovelId();
+        body.add("item_name", novelId == null ? "point" : novelId.toString());
+
+        body.add("quantity", "1");
+        body.add("total_amount", requestReady.getPoint().toString());
+        body.add("tax_free_amount", "0");
+        body.add("approval_url", APPROVAL_URL);
+        body.add("cancel_url", CANCEL_URL);
+        body.add("fail_url", FAIL_URL);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response;
+
+        response = restTemplate.exchange(
+            READY_URI,
+            HttpMethod.POST,
+            request,
+            String.class
+        ); // todo: try catch
+
+        String responseBody = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+        HttpHeaders header = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
+
+        Message message = new Message();
+
+        ResponseReady responseReady = new ResponseReady();
+        responseReady.setTid(jsonNode.get("tid").asText());
+        responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
+        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
+        responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
+        responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
+
+        message.setData(responseReady);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+    }
+}
