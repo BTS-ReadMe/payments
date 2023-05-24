@@ -2,15 +2,8 @@ server:
   port: 8080
 
 spring:
-
   application:
     name: users-service
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: bts1234bts
-    url: jdbc:mysql://ec2-43-200-189-164.ap-northeast-2.compute.amazonaws.com/users?serverTimezone=Asia/Seoul
 
 eureka:
   instance:

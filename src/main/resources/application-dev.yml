@@ -2,36 +2,13 @@ server:
   port: 8080
 
 spring:
-
   application:
     name: user-service
+  kafka:
+    admin:
+      client-id:
+    client-id:
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 1234
-    url: jdbc:mysql://localhost:3306/user
-
-  security:
-    payment:
-      client:
-        registration:
-          kakao:
-            client-name: kakao
-            client-id: cd2447cf90f5929ed98bc599d51f323d
-            client-secret: FEcBzqUhgg02OgA3R58yYXsU4Wb7TgGR
-            redirect-uri: http://localhost:8080
-            authorization-grant-type: authorization_code
-            scope:
-            #              - account_email
-            #              - profile_nickname
-            #              - profile_image
-            client-authentication-method: POST
-        provider:
-          kakao:
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-  #            user-name-attribute: id
 
 eureka:
   instance:
@@ -41,3 +18,18 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://43.200.189.164:8761/eureka
+
+payment:
+
+  key:
+    cid: "TC0ONETIME"
+    app_admin_key: "5192b723fd59e84d94d34bbb004c6c5a"
+
+  redirect_url:
+    approval_url: "http://localhost:8081"
+    cancel_url: "http://localhost:8082"
+    fail_url: "http://localhost:8083"
+
+  provider:
+    ready_uri: "https://kapi.kakao.com/v1/payment/ready"
+    approve_uri: "https://kapi.kakao.com/v1/payment/approve"
