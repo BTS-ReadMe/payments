@@ -1,8 +1,10 @@
 package com.readme.payments.responseObject;
 
+import lombok.Getter;
 import lombok.Setter;
 
 @Setter
+@Getter
 public class ResponseReady {
 
     private String tid;

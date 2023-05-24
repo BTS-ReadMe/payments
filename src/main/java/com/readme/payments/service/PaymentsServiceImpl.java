@@ -72,7 +72,6 @@ public class PaymentsServiceImpl implements PaymentsService {
             String.class
         ); // todo: try catch
 
-
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode;
