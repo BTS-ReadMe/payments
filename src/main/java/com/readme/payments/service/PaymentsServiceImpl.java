@@ -41,14 +41,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private String READY_URI;
 
     @Override
-    public ResponseEntity<Message<ResponseReady>> purchaseItem(RequestReady requestReady)
-        throws JsonProcessingException {
-
-        return ready(requestReady);
-    }
-
-    public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady)
-        throws JsonProcessingException {
+    public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
@@ -79,9 +72,15 @@ public class PaymentsServiceImpl implements PaymentsService {
             String.class
         ); // todo: try catch
 
+
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        JsonNode jsonNode;
+        try {
+            jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         HttpHeaders header = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));

@@ -13,18 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/payment")
+@RequestMapping("/v1/payments")
 public class paymentsController {
 
     private final PaymentsService paymentsService;
 
     @PostMapping("/ready")
     public ResponseEntity<Message<ResponseReady>> purchaseReady(@RequestBody RequestReady requestReady) {
-        try {
-            return paymentsService.purchaseItem(requestReady);
-        } catch (Exception e) {
-            return null;
-        }
+
+        return paymentsService.ready(requestReady);
+
     }
 
 }
