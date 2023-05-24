@@ -56,7 +56,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("cid", CID);
 
-        String partnerOrderId = generatePartnerOrderId();
+        String partnerOrderId = requestReady.getUuid() + generatePartnerOrderId();
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
@@ -99,7 +99,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         responseReady.setPartner_order_id(partnerOrderId);
         responseReady.setTid(jsonNode.get("tid").asText());
         responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
-        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_mobile_url(
+            jsonNode.get("next_redirect_mobile_url").asText());
         responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
         responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
         responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
@@ -121,7 +122,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         body.add("partner_order_id", requestApprove.getPartnerOrderId());
         body.add("partner_user_id", requestApprove.getUuid());
         body.add("pg_token", requestApprove.getPgToken());
-
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
         RestTemplate restTemplate = new RestTemplate();
@@ -148,7 +148,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         Message message = new Message();
 
-        ResponseApprove responseApprove=new ResponseApprove();
+        ResponseApprove responseApprove = new ResponseApprove();
         responseApprove.setAmount(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
         responseApprove.setPoint(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
         responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
