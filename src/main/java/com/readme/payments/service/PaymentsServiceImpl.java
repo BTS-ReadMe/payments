@@ -3,13 +3,16 @@ package com.readme.payments.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.readme.payments.requestObject.RequestPurchase;
-import java.util.HashMap;
-import java.util.Map;
+import com.readme.payments.responseObject.Message;
+import com.readme.payments.responseObject.ResponseReady;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -38,14 +41,13 @@ public class PaymentsServiceImpl implements PaymentsService {
     private String READY_URI;
 
     @Override
-    public String purchaseItem(RequestPurchase requestPurchase) throws JsonProcessingException {
+    public ResponseEntity<Message<ResponseReady>> purchaseItem(RequestPurchase requestPurchase)
+        throws JsonProcessingException {
 
-        Map<String, String> ready = ready(requestPurchase);
-
-        return null;
+        return ready(requestPurchase);
     }
 
-    public Map<String, String> ready(RequestPurchase requestPurchase)
+    public ResponseEntity<Message<ResponseReady>> ready(RequestPurchase requestPurchase)
         throws JsonProcessingException {
 
         HttpHeaders headers = new HttpHeaders();
@@ -81,14 +83,21 @@ public class PaymentsServiceImpl implements PaymentsService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
 
-        Map<String, String> result = new HashMap<>();
-        result.put("tid", jsonNode.get("tid").asText());
-        result.put("next_redirect_app_url", jsonNode.get("next_redirect_app_url").asText());
-        result.put("next_redirect_mobile_url", jsonNode.get("next_redirect_mobile_url").asText());
-        result.put("next_redirect_pc_url", jsonNode.get("next_redirect_pc_url").asText());
-        result.put("android_app_scheme", jsonNode.get("android_app_scheme").asText());
-        result.put("ios_app_scheme", jsonNode.get("ios_app_scheme").asText());
+        HttpHeaders header = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
 
-        return result;
+        Message message = new Message();
+
+        ResponseReady responseReady = new ResponseReady();
+        responseReady.setTid(jsonNode.get("tid").asText());
+        responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
+        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
+        responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
+        responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
+
+        message.setData(responseReady);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
     }
 }
