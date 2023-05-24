@@ -18,8 +18,8 @@ public class paymentsController {
 
     private final PaymentsService paymentsService;
 
-    @PostMapping("/purchase")
-    public ResponseEntity<Message<ResponseReady>> purchaseItem(@RequestBody RequestPurchase requestPurchase) {
+    @PostMapping("/ready")
+    public ResponseEntity<Message<ResponseReady>> purchaseReady(@RequestBody RequestPurchase requestPurchase) {
         try {
             return paymentsService.purchaseItem(requestPurchase);
         } catch (Exception e) {
