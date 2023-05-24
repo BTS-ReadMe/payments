@@ -38,7 +38,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private String READY_URI;
 
     @Override
-    public String chargePoint(RequestPurchase requestPurchase) throws JsonProcessingException {
+    public String purchaseItem(RequestPurchase requestPurchase) throws JsonProcessingException {
 
         Map<String, String> ready = ready(requestPurchase);
 

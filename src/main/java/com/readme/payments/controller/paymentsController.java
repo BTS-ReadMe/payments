@@ -18,7 +18,7 @@ public class paymentsController {
     @PostMapping("/purchase")
     public String purchaseItem(@RequestBody RequestPurchase requestPurchase) {
         try {
-            return paymentsService.chargePoint(requestPurchase);
+            return paymentsService.purchaseItem(requestPurchase);
         } catch (Exception e) {
             return null;
         }

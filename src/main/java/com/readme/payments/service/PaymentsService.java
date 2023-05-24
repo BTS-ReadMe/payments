@@ -5,6 +5,6 @@ import com.readme.payments.requestObject.RequestPurchase;
 
 public interface PaymentsService{
 
-    public String chargePoint(RequestPurchase requestPurchase) throws JsonProcessingException;
+    public String purchaseItem(RequestPurchase requestPurchase) throws JsonProcessingException;
 
 }
