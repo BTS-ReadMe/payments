@@ -7,6 +7,8 @@ import lombok.Setter;
 @Getter
 public class ResponseReady {
 
+    private String partner_order_id;
+
     private String tid;
     private String next_redirect_app_url;
     private String next_redirect_mobile_url;

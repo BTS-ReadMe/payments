@@ -19,7 +19,7 @@ public class paymentsController {
 
     private final PaymentsService paymentsService;
 
-    @GetMapping("/ready")
+    @PostMapping("/ready")
     public ResponseEntity<Message<ResponseReady>> purchaseReady(@RequestBody RequestReady requestReady) {
 
        return paymentsService.ready(requestReady);

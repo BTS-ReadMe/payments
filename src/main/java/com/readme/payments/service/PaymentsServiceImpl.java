@@ -7,6 +7,7 @@ import com.google.common.base.Charsets;
 import com.readme.payments.requestObject.RequestReady;
 import com.readme.payments.responseObject.Message;
 import com.readme.payments.responseObject.ResponseReady;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -48,7 +49,9 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("cid", CID);
-        body.add("partner_order_id", "1");
+
+        String partnerOrderId = generatePartnerOrderId();
+        body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
         Long novelId = requestReady.getNovelId();
@@ -87,6 +90,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         Message message = new Message();
 
         ResponseReady responseReady = new ResponseReady();
+        responseReady.setPartner_order_id(partnerOrderId);
         responseReady.setTid(jsonNode.get("tid").asText());
         responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
         responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
@@ -97,5 +101,15 @@ public class PaymentsServiceImpl implements PaymentsService {
         message.setData(responseReady);
 
         return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+    }
+
+    public String generatePartnerOrderId() {
+        int targetStringLength = 12;
+        Random random = new Random();
+        return random.ints('0', 'z' + 1)
+            .filter(i -> (i <= '0' || i >= 'A') && (i <= 'Z' || i >= 'a'))
+            .limit(targetStringLength)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
     }
 }
