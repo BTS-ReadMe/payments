@@ -56,7 +56,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("cid", CID);
 
-        String partnerOrderId = requestReady.getUuid() + generatePartnerOrderId();
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        String partnerOrderId = requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
