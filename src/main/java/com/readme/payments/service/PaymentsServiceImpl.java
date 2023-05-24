@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.readme.payments.requestObject.RequestApprove;
 import com.readme.payments.requestObject.RequestReady;
 import com.readme.payments.responseObject.Message;
+import com.readme.payments.responseObject.ResponseApprove;
 import com.readme.payments.responseObject.ResponseReady;
+import java.time.LocalDateTime;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +44,9 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Value("${payment.provider.ready_uri}")
     private String READY_URI;
 
+    @Value("${payment.provider.approve_uri}")
+    private String APPROVE_URI;
+
     @Override
     public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady) {
 
@@ -48,7 +55,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("cid", CID);
-        body.add("partner_order_id", "1");
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        String partnerOrderId = requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
+        body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
         Long novelId = requestReady.getNovelId();
@@ -72,7 +83,6 @@ public class PaymentsServiceImpl implements PaymentsService {
             String.class
         ); // todo: try catch
 
-
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode;
@@ -88,9 +98,11 @@ public class PaymentsServiceImpl implements PaymentsService {
         Message message = new Message();
 
         ResponseReady responseReady = new ResponseReady();
+        responseReady.setPartner_order_id(partnerOrderId);
         responseReady.setTid(jsonNode.get("tid").asText());
         responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
-        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_mobile_url(
+            jsonNode.get("next_redirect_mobile_url").asText());
         responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
         responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
         responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
@@ -98,5 +110,63 @@ public class PaymentsServiceImpl implements PaymentsService {
         message.setData(responseReady);
 
         return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+    }
+
+    @Override
+    public ResponseEntity<Message<ResponseApprove>> approve(RequestApprove requestApprove) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("cid", CID);
+        body.add("tid", requestApprove.getTid());
+        body.add("partner_order_id", requestApprove.getPartnerOrderId());
+        body.add("partner_user_id", requestApprove.getUuid());
+        body.add("pg_token", requestApprove.getPgToken());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response;
+
+        response = restTemplate.exchange(
+            APPROVE_URI,
+            HttpMethod.POST,
+            request,
+            String.class
+        ); // todo: try catch
+
+        String responseBody = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode;
+        try {
+            jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        HttpHeaders header = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
+
+        Message message = new Message();
+
+        ResponseApprove responseApprove = new ResponseApprove();
+        responseApprove.setAmount(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
+        responseApprove.setPoint(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
+        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
+
+        message.setData(responseApprove);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+    }
+
+    public String generatePartnerOrderId() {
+        int targetStringLength = 12;
+        Random random = new Random();
+        return random.ints('0', 'z' + 1)
+            .filter(i -> (i <= '0' || i >= 'A') && (i <= 'Z' || i >= 'a'))
+            .limit(targetStringLength)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
     }
 }
