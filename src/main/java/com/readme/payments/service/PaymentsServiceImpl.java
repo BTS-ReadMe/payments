@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.readme.payments.requestObject.RequestPurchase;
+import com.readme.payments.requestObject.RequestReady;
 import com.readme.payments.responseObject.Message;
 import com.readme.payments.responseObject.ResponseReady;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,13 +41,13 @@ public class PaymentsServiceImpl implements PaymentsService {
     private String READY_URI;
 
     @Override
-    public ResponseEntity<Message<ResponseReady>> purchaseItem(RequestPurchase requestPurchase)
+    public ResponseEntity<Message<ResponseReady>> purchaseItem(RequestReady requestReady)
         throws JsonProcessingException {
 
-        return ready(requestPurchase);
+        return ready(requestReady);
     }
 
-    public ResponseEntity<Message<ResponseReady>> ready(RequestPurchase requestPurchase)
+    public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady)
         throws JsonProcessingException {
 
         HttpHeaders headers = new HttpHeaders();
@@ -56,13 +56,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("cid", CID);
         body.add("partner_order_id", "1");
-        body.add("partner_user_id", requestPurchase.getUuid());
+        body.add("partner_user_id", requestReady.getUuid());
 
-        Long novelId = requestPurchase.getNovelId();
+        Long novelId = requestReady.getNovelId();
         body.add("item_name", novelId == null ? "point" : novelId.toString());
 
         body.add("quantity", "1");
-        body.add("total_amount", requestPurchase.getPoint().toString());
+        body.add("total_amount", requestReady.getPoint().toString());
         body.add("tax_free_amount", "0");
         body.add("approval_url", APPROVAL_URL);
         body.add("cancel_url", CANCEL_URL);

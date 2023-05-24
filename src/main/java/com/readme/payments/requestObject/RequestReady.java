@@ -3,7 +3,7 @@ package com.readme.payments.requestObject;
 import lombok.Getter;
 
 @Getter
-public class RequestPurchase {
+public class RequestReady {
 
     private Long novelId;
     private Integer point;

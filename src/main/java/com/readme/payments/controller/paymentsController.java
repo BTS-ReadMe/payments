@@ -1,6 +1,6 @@
 package com.readme.payments.controller;
 
-import com.readme.payments.requestObject.RequestPurchase;
+import com.readme.payments.requestObject.RequestReady;
 import com.readme.payments.responseObject.Message;
 import com.readme.payments.responseObject.ResponseReady;
 import com.readme.payments.service.PaymentsService;
@@ -19,9 +19,9 @@ public class paymentsController {
     private final PaymentsService paymentsService;
 
     @PostMapping("/ready")
-    public ResponseEntity<Message<ResponseReady>> purchaseReady(@RequestBody RequestPurchase requestPurchase) {
+    public ResponseEntity<Message<ResponseReady>> purchaseReady(@RequestBody RequestReady requestReady) {
         try {
-            return paymentsService.purchaseItem(requestPurchase);
+            return paymentsService.purchaseItem(requestReady);
         } catch (Exception e) {
             return null;
         }
