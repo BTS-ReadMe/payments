@@ -158,9 +158,6 @@ public class PaymentsServiceImpl implements PaymentsService {
             .chargeType(jsonNode.get("payment_method_type").asText())
             .build());
 
-        HttpHeaders header = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
-
         Message message = new Message();
 
         ResponseApprove responseApprove = new ResponseApprove();
@@ -170,7 +167,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         message.setData(responseApprove);
 
-        return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     public String generatePartnerOrderId() {
