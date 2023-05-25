@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.readme.payments.model.ChargeRecord;
+import com.readme.payments.repository.ChargeRepository;
 import com.readme.payments.requestObject.RequestApprove;
 import com.readme.payments.requestObject.RequestReady;
 import com.readme.payments.responseObject.Message;
@@ -11,6 +13,7 @@ import com.readme.payments.responseObject.ResponseApprove;
 import com.readme.payments.responseObject.ResponseReady;
 import java.time.LocalDateTime;
 import java.util.Random;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +27,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentsServiceImpl implements PaymentsService {
+
+    private final ChargeRepository chargeRepository;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -58,7 +64,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         LocalDateTime localDateTime = LocalDateTime.now();
 
-        String partnerOrderId = requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
+        String partnerOrderId =
+            requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
@@ -145,19 +152,22 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new RuntimeException(e);
         }
 
-        HttpHeaders header = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
+        chargeRepository.save(ChargeRecord.builder()
+            .uuid(requestApprove.getUuid())
+            .price(jsonNode.get("amount").get("total").asInt())
+            .chargeType(jsonNode.get("payment_method_type").asText())
+            .build());
 
         Message message = new Message();
 
         ResponseApprove responseApprove = new ResponseApprove();
-        responseApprove.setAmount(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
-        responseApprove.setPoint(Integer.valueOf(jsonNode.get("amount").get("total").asText()));
+        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
+        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
         responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
 
         message.setData(responseApprove);
 
-        return ResponseEntity.status(HttpStatus.OK).headers(header).body(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     public String generatePartnerOrderId() {

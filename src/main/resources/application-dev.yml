@@ -2,12 +2,29 @@ server:
   port: 8080
 
 spring:
+
   application:
     name: payments-service
-  kafka:
-    admin:
-      client-id:
-    client-id:
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+    url: jdbc:mysql://localhost:3306/payment
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: create #create
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        format_sql: true
 
 
 eureka:
@@ -17,7 +34,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://43.200.189.164:8761/eureka
+      defaultZone: http://10.10.10.214:8761/eureka
 
 payment:
 
