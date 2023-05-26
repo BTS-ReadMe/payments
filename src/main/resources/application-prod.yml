@@ -1,9 +1,30 @@
 server:
-  port: 8080
+  port: 8097
 
 spring:
+
   application:
-    name: users-service
+    name: payments-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: bts1234bts
+    url: jdbc:mysql://ec2-43-200-189-164.ap-northeast-2.compute.amazonaws.com/payments?serverTimezone=Asia/Seoul
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: create #create
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        format_sql: true
 
 eureka:
   instance:
@@ -13,3 +34,18 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://43.200.189.164:8761/eureka
+
+payment:
+
+  key:
+    cid: "TC0ONETIME"
+    app_admin_key: "5192b723fd59e84d94d34bbb004c6c5a"
+
+  redirect_url:
+    approval_url: "http://readme.life/approval"
+    cancel_url: "http://readme.life/cancel"
+    fail_url: "http://readme.life/fail"
+
+  provider:
+    ready_uri: "https://kapi.kakao.com/v1/payment/ready"
+    approve_uri: "https://kapi.kakao.com/v1/payment/approve"

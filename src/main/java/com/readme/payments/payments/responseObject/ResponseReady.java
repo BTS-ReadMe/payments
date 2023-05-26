@@ -1,4 +1,4 @@
-package com.readme.payments.responseObject;
+package com.readme.payments.payments.responseObject;
 
 import lombok.Getter;
 import lombok.Setter;

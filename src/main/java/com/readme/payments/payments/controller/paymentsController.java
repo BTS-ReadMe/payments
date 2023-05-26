@@ -1,11 +1,11 @@
-package com.readme.payments.controller;
+package com.readme.payments.payments.controller;
 
-import com.readme.payments.requestObject.RequestApprove;
-import com.readme.payments.requestObject.RequestReady;
-import com.readme.payments.responseObject.Message;
-import com.readme.payments.responseObject.ResponseApprove;
-import com.readme.payments.responseObject.ResponseReady;
-import com.readme.payments.service.PaymentsService;
+import com.readme.payments.payments.requestObject.RequestApprove;
+import com.readme.payments.payments.requestObject.RequestReady;
+import com.readme.payments.payments.responseObject.Message;
+import com.readme.payments.payments.responseObject.ResponseApprove;
+import com.readme.payments.payments.responseObject.ResponseReady;
+import com.readme.payments.payments.service.PaymentsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
