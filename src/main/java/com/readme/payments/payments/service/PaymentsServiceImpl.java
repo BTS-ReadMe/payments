@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.ChargePointDto;
+import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.ChargeRepository;
@@ -179,6 +180,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 //        message.setData(responseApprove);
 
         return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
+    @Override
+    public ResponseEntity<Message<RequestApprove>> purchase(RequestPurchase requestPurchase) {
+        return null;
     }
 
     public String generatePartnerOrderId() {
