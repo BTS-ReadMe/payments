@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.ChargePointDto;
+import com.readme.payments.payments.dto.PurchaseEpisodeDto;
 import com.readme.payments.payments.model.PurchaseRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
@@ -17,6 +18,7 @@ import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
+import com.readme.payments.payments.service.producer.SendPurchaseEpisodeService;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final ChargeRepository chargeRepository;
     private final PurchaseRepository purchaseRepository;
     private final SendChargePointService sendChargePointService;
+    private final SendPurchaseEpisodeService sendPurchaseEpisodeService;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -194,7 +197,13 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .episodeId(requestPurchase.getEpisodeId())
             .build());
 
+        sendPurchaseEpisodeService.sendPurchaseEpisode("purchaseEpisode",
+            PurchaseEpisodeDto.builder()
+                .uuid(requestPurchase.getUuid())
+                .build());
+
         Message message = new Message();
+
         return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
