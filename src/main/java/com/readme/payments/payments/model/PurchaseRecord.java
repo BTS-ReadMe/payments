@@ -1,5 +1,6 @@
 package com.readme.payments.payments.model;
 
+import com.readme.payments.utility.BaseTimeEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseRecord {
+public class PurchaseRecord extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +23,4 @@ public class PurchaseRecord {
 
     private String uuid;
     private Long episodeId;
-    private Integer point;
 }

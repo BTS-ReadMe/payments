@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.ChargePointDto;
+import com.readme.payments.payments.model.PurchaseRecord;
+import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
+import com.readme.payments.payments.responseObject.ResponsePurchase;
 import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.ChargeRepository;
@@ -34,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
+    private final PurchaseRepository purchaseRepository;
     private final SendChargePointService sendChargePointService;
 
     @Value("${payment.key.cid}")
@@ -183,8 +187,15 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
-    public ResponseEntity<Message<RequestApprove>> purchase(RequestPurchase requestPurchase) {
-        return null;
+    public ResponseEntity<Message<ResponsePurchase>> purchase(RequestPurchase requestPurchase) {
+
+        purchaseRepository.save(PurchaseRecord.builder()
+                .uuid(requestPurchase.getUuid())
+                .episodeId(requestPurchase.getEpisodeId())
+            .build());
+
+        Message message = new Message();
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     public String generatePartnerOrderId() {
