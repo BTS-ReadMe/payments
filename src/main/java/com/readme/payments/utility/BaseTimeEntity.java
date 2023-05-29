@@ -1,4 +1,4 @@
-package com.readme.utility;
+package com.readme.payments.utility;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;

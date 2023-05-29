@@ -1,6 +1,6 @@
 package com.readme.payments.model;
 
-import com.readme.utility.BaseTimeEntity;
+import com.readme.payments.utility.BaseTimeEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
