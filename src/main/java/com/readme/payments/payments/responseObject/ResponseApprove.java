@@ -1,4 +1,4 @@
-package com.readme.payments.responseObject;
+package com.readme.payments.payments.responseObject;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
