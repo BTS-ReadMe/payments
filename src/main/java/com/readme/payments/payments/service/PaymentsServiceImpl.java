@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.ChargePointDto;
-import com.readme.payments.payments.service.producer.SendChargePointService;
+import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
@@ -13,6 +13,8 @@ import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
+import com.readme.payments.payments.service.producer.SendChargePointService;
+import com.readme.payments.payments.service.sseEmitter.SseEmitterService;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
     private final SendChargePointService sendChargePointService;
+    private final SseEmitterService sseEmitterService;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -68,7 +72,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         LocalDateTime localDateTime = LocalDateTime.now();
 
         String partnerOrderId =
-            requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
+            requestReady.getUuid() + generatePartnerOrderId() + localDateTime;
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
@@ -111,7 +115,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         responseReady.setPartner_order_id(partnerOrderId);
         responseReady.setTid(jsonNode.get("tid").asText());
         responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
-        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_mobile_url(
+            jsonNode.get("next_redirect_mobile_url").asText());
         responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
         responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
         responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
@@ -124,61 +129,66 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     public ResponseEntity<Message<ResponseApprove>> approve(RequestApprove requestApprove) {
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
-//
-//        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-//        body.add("cid", CID);
-//        body.add("tid", requestApprove.getTid());
-//        body.add("partner_order_id", requestApprove.getPartnerOrderId());
-//        body.add("partner_user_id", requestApprove.getUuid());
-//        body.add("pg_token", requestApprove.getPgToken());
-//
-//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<String> response;
-//
-//        response = restTemplate.exchange(
-//            APPROVE_URI,
-//            HttpMethod.POST,
-//            request,
-//            String.class
-//        ); // todo: try catch
-//
-//        String responseBody = response.getBody();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode jsonNode;
-//        try {
-//            jsonNode = objectMapper.readTree(responseBody);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("cid", CID);
+        body.add("tid", requestApprove.getTid());
+        body.add("partner_order_id", requestApprove.getPartnerOrderId());
+        body.add("partner_user_id", requestApprove.getUuid());
+        body.add("pg_token", requestApprove.getPgToken());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response;
+
+        response = restTemplate.exchange(
+            APPROVE_URI,
+            HttpMethod.POST,
+            request,
+            String.class
+        ); //todo: try catch
+
+        String responseBody = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode;
+        try {
+            jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         chargeRepository.save(ChargeRecord.builder()
             .uuid(requestApprove.getUuid())
-//            .price(jsonNode.get("amount").get("total").asInt())
-//            .chargeType(jsonNode.get("payment_method_type").asText())
-                .price(10000)
-                .chargeType("MONEY")
+            .price(jsonNode.get("amount").get("total").asInt())
+            .chargeType(jsonNode.get("payment_method_type").asText())
             .build());
 
         sendChargePointService.sendChargePoint("chargePoint",
             ChargePointDto.builder()
                 .uuid(requestApprove.getUuid())
-//                .point(jsonNode.get("amount").get("total").asInt())
-                .point(10000)
+                .point(jsonNode.get("amount").get("total").asInt())
                 .build());
 
         Message message = new Message();
 
-//        ResponseApprove responseApprove = new ResponseApprove();
-//        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
-//        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
-//        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
-//
-//        message.setData(responseApprove);
+        ResponseApprove responseApprove = new ResponseApprove();
+        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
+        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
+        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
+
+        message.setData(responseApprove);
 
         return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
+    @Override
+    public SseEmitter purchase(RequestPurchase requestPurchase) {
+
+        return sseEmitterService.sendPurchaseEpisode(
+            requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
+                + System.currentTimeMillis(), requestPurchase.getUuid());
     }
 
     public String generatePartnerOrderId() {
