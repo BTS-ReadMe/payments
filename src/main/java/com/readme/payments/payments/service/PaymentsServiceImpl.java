@@ -5,11 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.ChargePointDto;
-import com.readme.payments.payments.dto.PurchaseEpisodeDto;
-import com.readme.payments.payments.model.PurchaseRecord;
-import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
-import com.readme.payments.payments.responseObject.ResponsePurchase;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
@@ -18,7 +14,6 @@ import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
-import com.readme.payments.payments.service.producer.SendPurchaseEpisodeService;
 import com.readme.payments.payments.service.sseEmitter.SseEmitterService;
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -41,7 +36,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
-    private final PurchaseRepository purchaseRepository;
     private final SendChargePointService sendChargePointService;
     private final SseEmitterService sseEmitterService;
 
@@ -78,7 +72,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         LocalDateTime localDateTime = LocalDateTime.now();
 
         String partnerOrderId =
-            requestReady.getUuid() + generatePartnerOrderId() + localDateTime.toString();
+            requestReady.getUuid() + generatePartnerOrderId() + localDateTime;
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
 
@@ -135,59 +129,56 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     public ResponseEntity<Message<ResponseApprove>> approve(RequestApprove requestApprove) {
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
-//
-//        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-//        body.add("cid", CID);
-//        body.add("tid", requestApprove.getTid());
-//        body.add("partner_order_id", requestApprove.getPartnerOrderId());
-//        body.add("partner_user_id", requestApprove.getUuid());
-//        body.add("pg_token", requestApprove.getPgToken());
-//
-//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<String> response;
-//
-//        response = restTemplate.exchange(
-//            APPROVE_URI,
-//            HttpMethod.POST,
-//            request,
-//            String.class
-//        ); // todo: try catch
-//
-//        String responseBody = response.getBody();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode jsonNode;
-//        try {
-//            jsonNode = objectMapper.readTree(responseBody);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("cid", CID);
+        body.add("tid", requestApprove.getTid());
+        body.add("partner_order_id", requestApprove.getPartnerOrderId());
+        body.add("partner_user_id", requestApprove.getUuid());
+        body.add("pg_token", requestApprove.getPgToken());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response;
+
+        response = restTemplate.exchange(
+            APPROVE_URI,
+            HttpMethod.POST,
+            request,
+            String.class
+        ); //todo: try catch
+
+        String responseBody = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode;
+        try {
+            jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         chargeRepository.save(ChargeRecord.builder()
             .uuid(requestApprove.getUuid())
-//            .price(jsonNode.get("amount").get("total").asInt())
-//            .chargeType(jsonNode.get("payment_method_type").asText())
-            .price(100)
-            .chargeType("MONEY")
+            .price(jsonNode.get("amount").get("total").asInt())
+            .chargeType(jsonNode.get("payment_method_type").asText())
             .build());
 
         sendChargePointService.sendChargePoint("chargePoint",
             ChargePointDto.builder()
                 .uuid(requestApprove.getUuid())
-//                .point(jsonNode.get("amount").get("total").asInt())
-                .point(100)
+                .point(jsonNode.get("amount").get("total").asInt())
                 .build());
 
         Message message = new Message();
 
-//        ResponseApprove responseApprove = new ResponseApprove();
-//        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
-//        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
-//        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
-//
-//        message.setData(responseApprove);
+        ResponseApprove responseApprove = new ResponseApprove();
+        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
+        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
+        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
+
+        message.setData(responseApprove);
 
         return ResponseEntity.status(HttpStatus.OK).body(message);
     }
