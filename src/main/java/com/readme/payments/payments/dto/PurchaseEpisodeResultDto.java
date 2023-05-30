@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PurchaseEpisodeDto {
+public class PurchaseEpisodeResultDto {
 
     private String id;
-    private String message;
+    private Boolean result;
 }

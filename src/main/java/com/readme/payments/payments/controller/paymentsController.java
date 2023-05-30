@@ -8,12 +8,14 @@ import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponsePurchase;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.PaymentsService;
+import com.readme.payments.payments.service.sseEmitter.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class paymentsController {
     }
 
     @PostMapping("/purchase")
-    public ResponseEntity<Message<ResponsePurchase>> purchaseEpisode(@RequestBody RequestPurchase requestPurchase){
+    public SseEmitter purchaseEpisode(@RequestBody RequestPurchase requestPurchase){
         return paymentsService.purchase(requestPurchase);
     }
 }

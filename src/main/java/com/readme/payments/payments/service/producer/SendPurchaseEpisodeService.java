@@ -12,7 +12,7 @@ public class SendPurchaseEpisodeService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendPurchaseEpisode(String topic, PurchaseEpisodeDto purchaseEpisodeDto) {
+    public void sendPurchaseEpisode(PurchaseEpisodeDto purchaseEpisodeDto) {
         ObjectMapper mapper = new ObjectMapper();
         String data = "";
 
@@ -22,6 +22,6 @@ public class SendPurchaseEpisodeService {
             return;
         }
 
-        kafkaTemplate.send(topic, data);
+        kafkaTemplate.send("purchaseEpisode", data);
     }
 }

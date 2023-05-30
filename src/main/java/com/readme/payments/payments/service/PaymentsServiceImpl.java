@@ -19,6 +19,7 @@ import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.service.producer.SendPurchaseEpisodeService;
+import com.readme.payments.payments.service.sseEmitter.SseEmitterService;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final ChargeRepository chargeRepository;
     private final PurchaseRepository purchaseRepository;
     private final SendChargePointService sendChargePointService;
-    private final SendPurchaseEpisodeService sendPurchaseEpisodeService;
+    private final SseEmitterService sseEmitterService;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -119,7 +121,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         responseReady.setPartner_order_id(partnerOrderId);
         responseReady.setTid(jsonNode.get("tid").asText());
         responseReady.setNext_redirect_app_url(jsonNode.get("next_redirect_app_url").asText());
-        responseReady.setNext_redirect_mobile_url(jsonNode.get("next_redirect_mobile_url").asText());
+        responseReady.setNext_redirect_mobile_url(
+            jsonNode.get("next_redirect_mobile_url").asText());
         responseReady.setNext_redirect_pc_url(jsonNode.get("next_redirect_pc_url").asText());
         responseReady.setAndroid_app_scheme(jsonNode.get("android_app_scheme").asText());
         responseReady.setIos_app_scheme(jsonNode.get("ios_app_scheme").asText());
@@ -166,15 +169,15 @@ public class PaymentsServiceImpl implements PaymentsService {
             .uuid(requestApprove.getUuid())
 //            .price(jsonNode.get("amount").get("total").asInt())
 //            .chargeType(jsonNode.get("payment_method_type").asText())
-                .price(10000)
-                .chargeType("MONEY")
+            .price(100)
+            .chargeType("MONEY")
             .build());
 
         sendChargePointService.sendChargePoint("chargePoint",
             ChargePointDto.builder()
                 .uuid(requestApprove.getUuid())
 //                .point(jsonNode.get("amount").get("total").asInt())
-                .point(10000)
+                .point(100)
                 .build());
 
         Message message = new Message();
@@ -190,21 +193,11 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
-    public ResponseEntity<Message<ResponsePurchase>> purchase(RequestPurchase requestPurchase) {
+    public SseEmitter purchase(RequestPurchase requestPurchase) {
 
-        purchaseRepository.save(PurchaseRecord.builder()
-                .uuid(requestPurchase.getUuid())
-                .episodeId(requestPurchase.getEpisodeId())
-            .build());
-
-        sendPurchaseEpisodeService.sendPurchaseEpisode("purchaseEpisode",
-            PurchaseEpisodeDto.builder()
-                .uuid(requestPurchase.getUuid())
-                .build());
-
-        Message message = new Message();
-
-        return ResponseEntity.status(HttpStatus.OK).body(message);
+        return sseEmitterService.sendPurchaseEpisode(
+            requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
+                + System.currentTimeMillis(), requestPurchase.getUuid());
     }
 
     public String generatePartnerOrderId() {
