@@ -75,10 +75,6 @@ public class PaymentsServiceImpl implements PaymentsService {
             requestReady.getUuid() + generatePartnerOrderId() + localDateTime;
         body.add("partner_order_id", partnerOrderId);
         body.add("partner_user_id", requestReady.getUuid());
-
-        Long novelId = requestReady.getNovelId();
-        body.add("item_name", novelId == null ? "point" : novelId.toString());
-
         body.add("quantity", "1");
         body.add("total_amount", requestReady.getPoint().toString());
         body.add("tax_free_amount", "0");
