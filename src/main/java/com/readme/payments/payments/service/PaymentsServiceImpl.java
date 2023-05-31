@@ -14,7 +14,7 @@ import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
-import com.readme.payments.payments.service.sseEmitter.SendPurchaseEpisodeResultService;
+import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeResultService;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
     private final SendChargePointService sendChargePointService;
-    private final SendPurchaseEpisodeResultService sendPurchaseEpisodeResultService;
+    private final PurchaseEpisodeResultService purchaseEpisodeResultService;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -183,7 +183,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     public SseEmitter purchase(RequestPurchase requestPurchase) {
 
-        return sendPurchaseEpisodeResultService.sendPurchaseEpisode(
+        return purchaseEpisodeResultService.sendPurchaseEpisode(
             requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
                 + System.currentTimeMillis(), requestPurchase.getUuid());
     }
