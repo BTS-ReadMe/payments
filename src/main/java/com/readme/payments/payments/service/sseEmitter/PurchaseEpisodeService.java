@@ -23,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
-public class PurchaseEpisodeResultService {
+public class PurchaseEpisodeService {
 
     private Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final SendPurchaseEpisodeService sendPurchaseEpisodeService;
