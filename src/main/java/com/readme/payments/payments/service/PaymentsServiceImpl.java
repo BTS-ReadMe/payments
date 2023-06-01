@@ -201,9 +201,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
 
+        ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
+        responseCheckPurchased.setResult(
+            purchaseRepository.existsByUuidAndEpisodeId(requestCheckPurchased.getUuid(),
+                requestCheckPurchased.getEpisodeId()));
+
         Message message = new Message();
-        message.setData(purchaseRepository.existsByUuidAndEpisodeId(requestCheckPurchased.getUuid(),
-            requestCheckPurchased.getEpisodeId()));
+        message.setData(responseCheckPurchased);
 
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
     }
