@@ -192,12 +192,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
-        String uuid, RequestCheckPurchased requestCheckPurchased) {
+        String uuid, Long episodeId) {
 
         ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
         responseCheckPurchased.setResult(
-            purchaseRepository.existsByUuidAndEpisodeId(uuid,
-                requestCheckPurchased.getEpisodeId()));
+            purchaseRepository.existsByUuidAndEpisodeId(uuid, episodeId));
 
         Message message = new Message();
         message.setData(responseCheckPurchased);
