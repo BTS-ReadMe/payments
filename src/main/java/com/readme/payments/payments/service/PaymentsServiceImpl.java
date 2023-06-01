@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
-import com.readme.payments.payments.requestObject.RequestCheckPurchased;
-import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
@@ -192,12 +190,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
-        String uuid, RequestCheckPurchased requestCheckPurchased) {
+        String uuid, Long episodeId) {
 
         ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
         responseCheckPurchased.setResult(
-            purchaseRepository.existsByUuidAndEpisodeId(uuid,
-                requestCheckPurchased.getEpisodeId()));
+            purchaseRepository.existsByUuidAndEpisodeId(uuid, episodeId));
 
         Message message = new Message();
         message.setData(responseCheckPurchased);

@@ -1,8 +1,6 @@
 package com.readme.payments.payments.service;
 
 import com.readme.payments.payments.requestObject.RequestApprove;
-import com.readme.payments.payments.requestObject.RequestCheckPurchased;
-import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
@@ -23,6 +21,5 @@ public interface PaymentsService {
 
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(String uuid);
 
-    public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
-        String uuid, RequestCheckPurchased requestCheckPurchased);
+    public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(String uuid, Long episodeId);
 }

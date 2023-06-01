@@ -1,8 +1,6 @@
 package com.readme.payments.payments.controller;
 
 import com.readme.payments.payments.requestObject.RequestApprove;
-import com.readme.payments.payments.requestObject.RequestCheckPurchased;
-import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -59,7 +58,7 @@ public class paymentsController {
     @GetMapping("/checkPurchased")
     public ResponseEntity<Message<ResponseCheckPurchased>> purchaseEpisode(
         @RequestHeader(value = "uuid") String uuid,
-        @RequestBody RequestCheckPurchased requestCheckPurchased) {
-        return paymentsService.checkPurchased(uuid, requestCheckPurchased);
+        @RequestParam Long episodeId) {
+        return paymentsService.checkPurchased(uuid, episodeId);
     }
 }
