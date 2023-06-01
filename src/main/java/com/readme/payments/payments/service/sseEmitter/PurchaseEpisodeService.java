@@ -1,6 +1,5 @@
 package com.readme.payments.payments.service.sseEmitter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.dto.PurchaseEpisodeDto;
@@ -24,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
-public class SseEmitterService {
+public class PurchaseEpisodeService {
 
     private Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final SendPurchaseEpisodeService sendPurchaseEpisodeService;

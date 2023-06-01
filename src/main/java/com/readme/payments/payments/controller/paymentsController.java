@@ -4,7 +4,6 @@ import com.readme.payments.payments.requestObject.RequestApprove;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
-import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.PaymentsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +30,7 @@ public class paymentsController {
 
     @Operation(summary = "결제 요청하기", description = "결제", tags = {"결제"})
     @PostMapping("/approve")
-    public ResponseEntity<Message<ResponseApprove>> purchaseApprove(@RequestBody RequestApprove requestApprove){
+    public SseEmitter purchaseApprove(@RequestBody RequestApprove requestApprove){
         return paymentsService.approve(requestApprove);
     }
 

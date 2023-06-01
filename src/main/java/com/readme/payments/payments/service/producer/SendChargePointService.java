@@ -17,8 +17,6 @@ public class SendChargePointService {
         ObjectMapper mapper = new ObjectMapper();
         String data = "";
 
-        mapper.registerModule(new JavaTimeModule());
-
         try {
             data = mapper.writeValueAsString(chargePointDto);
         } catch (Exception e) {

@@ -4,17 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.readme.payments.payments.dto.ChargePointDto;
 import com.readme.payments.payments.requestObject.RequestPurchase;
-import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
-import com.readme.payments.payments.responseObject.ResponseApprove;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
-import com.readme.payments.payments.service.sseEmitter.SseEmitterService;
+import com.readme.payments.payments.service.sseEmitter.ChargePointService;
+import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
 import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
     private final SendChargePointService sendChargePointService;
-    private final SseEmitterService sseEmitterService;
+    private final PurchaseEpisodeService purchaseEpisodeService;
+    private final ChargePointService chargePointService;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -124,7 +123,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
-    public ResponseEntity<Message<ResponseApprove>> approve(RequestApprove requestApprove) {
+    public SseEmitter approve(RequestApprove requestApprove) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
@@ -156,34 +155,15 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new RuntimeException(e);
         }
 
-        chargeRepository.save(ChargeRecord.builder()
-            .uuid(requestApprove.getUuid())
-            .price(jsonNode.get("amount").get("total").asInt())
-            .chargeType(jsonNode.get("payment_method_type").asText())
-            .build());
-
-        sendChargePointService.sendChargePoint("chargePoint",
-            ChargePointDto.builder()
-                .uuid(requestApprove.getUuid())
-                .point(jsonNode.get("amount").get("total").asInt())
-                .build());
-
-        Message message = new Message();
-
-        ResponseApprove responseApprove = new ResponseApprove();
-        responseApprove.setAmount(jsonNode.get("amount").get("total").asInt());
-        responseApprove.setPoint(jsonNode.get("amount").get("total").asInt());
-        responseApprove.setPurchaseDate(LocalDateTime.parse(jsonNode.get("created_at").asText()));
-
-        message.setData(responseApprove);
-
-        return ResponseEntity.status(HttpStatus.OK).body(message);
+        return chargePointService.sendChargePoint(
+            requestApprove.getUuid() + "_" + System.currentTimeMillis(),
+            requestApprove.getUuid() + "_" + jsonNode.get("amount").get("total"));
     }
 
     @Override
     public SseEmitter purchase(RequestPurchase requestPurchase) {
 
-        return sseEmitterService.sendPurchaseEpisode(
+        return purchaseEpisodeService.sendPurchaseEpisode(
             requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
                 + System.currentTimeMillis(), requestPurchase.getUuid());
     }
