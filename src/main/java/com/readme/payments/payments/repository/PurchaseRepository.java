@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PurchaseRepository extends JpaRepository<PurchaseRecord, Long> {
 
+    Boolean existsByUuidAndEpisodeId(String uuid, Long episodeId);
 }

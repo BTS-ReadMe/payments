@@ -5,15 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.model.ChargeRecord;
+import com.readme.payments.payments.repository.PurchaseRepository;
+import com.readme.payments.payments.requestObject.RequestCheckPurchased;
 import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
+import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
 import com.readme.payments.payments.responseObject.ResponseReady;
-import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.service.sseEmitter.ChargePointService;
 import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
 import java.time.LocalDateTime;
@@ -39,7 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
-    private final SendChargePointService sendChargePointService;
+    private final PurchaseRepository purchaseRepository;
     private final PurchaseEpisodeService purchaseEpisodeService;
     private final ChargePointService chargePointService;
 
@@ -188,6 +190,20 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         Message message = new Message();
         message.setData(collect);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
+    }
+
+    @Override
+    public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
+        RequestCheckPurchased requestCheckPurchased) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
+
+        Message message = new Message();
+        message.setData(purchaseRepository.existsByUuidAndEpisodeId(requestCheckPurchased.getUuid(),
+            requestCheckPurchased.getEpisodeId()));
 
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
     }

@@ -1,10 +1,12 @@
 package com.readme.payments.payments.controller;
 
 import com.readme.payments.payments.requestObject.RequestApprove;
+import com.readme.payments.payments.requestObject.RequestCheckPurchased;
 import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
+import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.PaymentsService;
@@ -50,5 +52,12 @@ public class paymentsController {
     @PostMapping("/purchase")
     public SseEmitter purchaseEpisode(@RequestBody RequestPurchase requestPurchase) {
         return paymentsService.purchase(requestPurchase);
+    }
+
+    @Operation(summary = "에피소드 구매 확인", description = "에피소드 결제했는지 확인", tags = {"결제"})
+    @GetMapping("/checkPurchased")
+    public ResponseEntity<Message<ResponseCheckPurchased>> purchaseEpisode(
+        @RequestBody RequestCheckPurchased requestCheckPurchased) {
+        return paymentsService.checkPurchased(requestCheckPurchased);
     }
 }
