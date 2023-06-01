@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
-import com.readme.payments.payments.requestObject.RequestCheckPurchased;
-import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
