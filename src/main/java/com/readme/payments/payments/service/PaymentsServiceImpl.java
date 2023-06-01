@@ -4,19 +4,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.readme.payments.payments.requestObject.RequestGetAllChargeHistory;
+import com.readme.payments.payments.model.ChargeRecord;
+import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
-import com.readme.payments.payments.responseObject.ResponseGetAllChargeHistory;
+import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.service.sseEmitter.ChargePointService;
 import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -171,9 +174,22 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
-    public ResponseEntity<Message<ResponseGetAllChargeHistory>> getAllChargeHistory(
-        RequestGetAllChargeHistory requestGetAllChargeHistory) {
-        return null;
+    public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(
+        RequestGetChargeHistory requestGetChargeHistory) {
+
+        List<ChargeRecord> result = chargeRepository.findAllByUuid(
+            requestGetChargeHistory.getUuid());
+        List<ResponseGetChargeHistory> collect = result.stream().map(
+                history -> new ResponseGetChargeHistory(history.getPrice(), history.getCreateDate()))
+            .collect(Collectors.toList());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
+
+        Message message = new Message();
+        message.setData(collect);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
     }
 
 
