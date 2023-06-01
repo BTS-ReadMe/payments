@@ -185,21 +185,15 @@ public class PaymentsServiceImpl implements PaymentsService {
                 history -> new ResponseGetChargeHistory(history.getPrice(), history.getCreateDate()))
             .collect(Collectors.toList());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
-
         Message message = new Message();
         message.setData(collect);
 
-        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     @Override
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
         RequestCheckPurchased requestCheckPurchased) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charsets.UTF_8));
 
         ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
         responseCheckPurchased.setResult(
@@ -209,7 +203,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         Message message = new Message();
         message.setData(responseCheckPurchased);
 
-        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
 
