@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -44,8 +45,8 @@ public class paymentsController {
     @Operation(summary = "포인트 충전 내역 조회", description = "포인트 충전 내역 전체 보기", tags = {"결제"})
     @GetMapping("/chargeHistory")
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(
-        @RequestBody RequestGetChargeHistory requestGetChargeHistory) {
-        return paymentsService.getAllChargeHistory(requestGetChargeHistory);
+        @RequestHeader(value = "uuid") String uuid) {
+        return paymentsService.getAllChargeHistory(uuid);
     }
 
     @Operation(summary = "에피소드 구매(100원)", description = "결제", tags = {"결제"})
@@ -57,7 +58,8 @@ public class paymentsController {
     @Operation(summary = "에피소드 구매 확인", description = "에피소드 결제했는지 확인", tags = {"결제"})
     @GetMapping("/checkPurchased")
     public ResponseEntity<Message<ResponseCheckPurchased>> purchaseEpisode(
+        @RequestHeader(value = "uuid") String uuid,
         @RequestBody RequestCheckPurchased requestCheckPurchased) {
-        return paymentsService.checkPurchased(requestCheckPurchased);
+        return paymentsService.checkPurchased(uuid, requestCheckPurchased);
     }
 }

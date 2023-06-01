@@ -177,10 +177,9 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(
-        RequestGetChargeHistory requestGetChargeHistory) {
+        String uuid) {
 
-        List<ChargeRecord> result = chargeRepository.findAllByUuid(
-            requestGetChargeHistory.getUuid());
+        List<ChargeRecord> result = chargeRepository.findAllByUuid(uuid);
         List<ResponseGetChargeHistory> collect = result.stream().map(
                 history -> new ResponseGetChargeHistory(history.getPrice(), history.getCreateDate()))
             .collect(Collectors.toList());
@@ -193,11 +192,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
-        RequestCheckPurchased requestCheckPurchased) {
+        String uuid, RequestCheckPurchased requestCheckPurchased) {
 
         ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
         responseCheckPurchased.setResult(
-            purchaseRepository.existsByUuidAndEpisodeId(requestCheckPurchased.getUuid(),
+            purchaseRepository.existsByUuidAndEpisodeId(uuid,
                 requestCheckPurchased.getEpisodeId()));
 
         Message message = new Message();

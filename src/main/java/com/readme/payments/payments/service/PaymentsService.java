@@ -21,9 +21,8 @@ public interface PaymentsService {
 
     public SseEmitter purchase(RequestPurchase requestPurchase);
 
-    public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(
-        RequestGetChargeHistory requestGetChargeHistory);
+    public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(String uuid);
 
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
-        RequestCheckPurchased requestCheckPurchased);
+        String uuid, RequestCheckPurchased requestCheckPurchased);
 }
