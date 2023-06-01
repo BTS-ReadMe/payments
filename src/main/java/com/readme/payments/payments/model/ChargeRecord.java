@@ -23,6 +23,5 @@ public class ChargeRecord extends BaseTimeEntity {
 
     private String uuid;
     private Integer price;
-//    private String chargeType;
 
 }

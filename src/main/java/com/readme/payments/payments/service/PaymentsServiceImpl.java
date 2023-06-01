@@ -4,17 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.readme.payments.payments.model.ChargeRecord;
+import com.readme.payments.payments.repository.PurchaseRepository;
+import com.readme.payments.payments.requestObject.RequestCheckPurchased;
+import com.readme.payments.payments.requestObject.RequestGetChargeHistory;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
 import com.readme.payments.payments.requestObject.RequestApprove;
 import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
+import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
+import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
 import com.readme.payments.payments.responseObject.ResponseReady;
-import com.readme.payments.payments.service.producer.SendChargePointService;
 import com.readme.payments.payments.service.sseEmitter.ChargePointService;
 import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -34,7 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
-    private final SendChargePointService sendChargePointService;
+    private final PurchaseRepository purchaseRepository;
     private final PurchaseEpisodeService purchaseEpisodeService;
     private final ChargePointService chargePointService;
 
@@ -167,6 +174,37 @@ public class PaymentsServiceImpl implements PaymentsService {
             requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
                 + System.currentTimeMillis(), requestPurchase.getUuid());
     }
+
+    @Override
+    public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(
+        String uuid) {
+
+        List<ChargeRecord> result = chargeRepository.findAllByUuid(uuid);
+        List<ResponseGetChargeHistory> collect = result.stream().map(
+                history -> new ResponseGetChargeHistory(history.getPrice(), history.getCreateDate()))
+            .collect(Collectors.toList());
+
+        Message message = new Message();
+        message.setData(collect);
+
+        return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
+    @Override
+    public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
+        String uuid, RequestCheckPurchased requestCheckPurchased) {
+
+        ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
+        responseCheckPurchased.setResult(
+            purchaseRepository.existsByUuidAndEpisodeId(uuid,
+                requestCheckPurchased.getEpisodeId()));
+
+        Message message = new Message();
+        message.setData(responseCheckPurchased);
+
+        return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
 
     public String generatePartnerOrderId() {
         int targetStringLength = 12;
