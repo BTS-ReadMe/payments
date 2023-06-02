@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.model.ChargeRecord;
+import com.readme.payments.payments.model.PurchaseRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
@@ -13,6 +14,7 @@ import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
+import com.readme.payments.payments.responseObject.ResponseGetPurchased;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.sseEmitter.ChargePointService;
 import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -195,6 +198,21 @@ public class PaymentsServiceImpl implements PaymentsService {
         ResponseCheckPurchased responseCheckPurchased = new ResponseCheckPurchased();
         responseCheckPurchased.setResult(
             purchaseRepository.existsByUuidAndEpisodeId(uuid, episodeId));
+
+        Message message = new Message();
+        message.setData(responseCheckPurchased);
+
+        return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
+    @Override
+    public ResponseEntity<Message<ResponseGetPurchased>> getPurchased(String uuid) {
+        List<PurchaseRecord> result = purchaseRepository.findAllByUuid(uuid);
+        List<Long> collect = result.stream().map(PurchaseRecord::getEpisodeId)
+            .collect(Collectors.toList());
+
+        ResponseGetPurchased responseCheckPurchased=new ResponseGetPurchased();
+        responseCheckPurchased.setEpisodeIds(collect);
 
         Message message = new Message();
         message.setData(responseCheckPurchased);

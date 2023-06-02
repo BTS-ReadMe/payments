@@ -6,6 +6,7 @@ import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
+import com.readme.payments.payments.responseObject.ResponseGetPurchased;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -22,4 +23,6 @@ public interface PaymentsService {
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(String uuid);
 
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(String uuid, Long episodeId);
+
+    public ResponseEntity<Message<ResponseGetPurchased>> getPurchased(String uuid);
 }

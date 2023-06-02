@@ -6,6 +6,7 @@ import com.readme.payments.payments.requestObject.RequestReady;
 import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
+import com.readme.payments.payments.responseObject.ResponseGetPurchased;
 import com.readme.payments.payments.responseObject.ResponseReady;
 import com.readme.payments.payments.service.PaymentsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,5 +61,12 @@ public class paymentsController {
         @RequestHeader(value = "uuid") String uuid,
         @RequestParam Long episodeId) {
         return paymentsService.checkPurchased(uuid, episodeId);
+    }
+
+    @Operation(summary = "구매 에피소드 조회", description = "구매 에피소드 전체 조회", tags = {"결제"})
+    @GetMapping("/getPurchased")
+    public ResponseEntity<Message<ResponseGetPurchased>> getPurchased(
+        @RequestHeader(value = "uuid") String uuid){
+        return paymentsService.getPurchased(uuid);
     }
 }
