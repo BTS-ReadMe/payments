@@ -8,5 +8,6 @@ import lombok.Getter;
 public class ChargePointDto {
 
     private String id;
+    private String uuid;
     private Integer point;
 }

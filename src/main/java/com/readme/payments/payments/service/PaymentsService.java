@@ -15,9 +15,9 @@ public interface PaymentsService {
 
     public ResponseEntity<Message<ResponseReady>> ready(RequestReady requestReady);
 
-    public SseEmitter approve(RequestApprove requestApprove);
+    public ResponseEntity<SseEmitter> approve(RequestApprove requestApprove);
 
-    public SseEmitter purchase(RequestPurchase requestPurchase);
+    public ResponseEntity<SseEmitter> purchase(RequestPurchase requestPurchase);
 
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(String uuid);
 

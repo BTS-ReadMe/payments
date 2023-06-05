@@ -6,10 +6,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResponseChargePoint {
+public class ResponsePurchaseEpisode {
 
     private String uuid;
-    private Integer total;
-    private Integer point;
-    private LocalDateTime chargeDate;
+    private Long episodeId;
+    private String result;
+    private LocalDateTime purchasedDate;
 }
