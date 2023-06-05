@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.readme.payments.payments.messageQueue.producer.ChargePointProducer;
+import com.readme.payments.payments.messageQueue.producer.PurchaseEpisodeProducer;
 import com.readme.payments.payments.model.ChargeRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
@@ -14,8 +16,6 @@ import com.readme.payments.payments.responseObject.Message;
 import com.readme.payments.payments.responseObject.ResponseCheckPurchased;
 import com.readme.payments.payments.responseObject.ResponseGetChargeHistory;
 import com.readme.payments.payments.responseObject.ResponseReady;
-import com.readme.payments.payments.service.sseEmitter.ChargePointService;
-import com.readme.payments.payments.service.sseEmitter.PurchaseEpisodeService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -40,8 +40,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private final ChargeRepository chargeRepository;
     private final PurchaseRepository purchaseRepository;
-    private final PurchaseEpisodeService purchaseEpisodeService;
-    private final ChargePointService chargePointService;
+    private final ChargePointProducer chargePointProducer;
+    private final PurchaseEpisodeProducer purchaseEpisodeProducer;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -128,7 +128,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
-    public SseEmitter approve(RequestApprove requestApprove) {
+    public ResponseEntity<SseEmitter> approve(RequestApprove requestApprove) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "KakaoAK " + APP_ADMIN_KEY);
@@ -149,28 +149,31 @@ public class PaymentsServiceImpl implements PaymentsService {
             HttpMethod.POST,
             request,
             String.class
-        ); //todo: try catch
+        );
 
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode;
+
         try {
             jsonNode = objectMapper.readTree(responseBody);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
-        return chargePointService.sendChargePoint(
-            requestApprove.getUuid() + "_" + System.currentTimeMillis(),
-            requestApprove.getUuid() + "_" + jsonNode.get("amount").get("total"));
+        return ResponseEntity.status(HttpStatus.OK).body(
+            chargePointProducer.sendChargePoint(
+                requestApprove.getUuid(),
+                Integer.valueOf(jsonNode.get("amount").get("total").asText())));
+
     }
 
     @Override
-    public SseEmitter purchase(RequestPurchase requestPurchase) {
+    public ResponseEntity<SseEmitter> purchase(RequestPurchase requestPurchase) {
 
-        return purchaseEpisodeService.sendPurchaseEpisode(
-            requestPurchase.getUuid() + "_" + requestPurchase.getEpisodeId() + "_"
-                + System.currentTimeMillis(), requestPurchase.getUuid());
+        return ResponseEntity.status(HttpStatus.OK).body(
+            purchaseEpisodeProducer.sendPurchaseEpisode(requestPurchase.getUuid(),
+                requestPurchase.getEpisodeId()));
     }
 
     @Override

@@ -9,7 +9,8 @@ import lombok.Setter;
 public class ChargePointResultDto {
 
     private String id;
+    private String uuid;
     private Integer total;
     private Integer point;
-    private LocalDateTime chargeDate;
+    private LocalDateTime chargedDate;
 }

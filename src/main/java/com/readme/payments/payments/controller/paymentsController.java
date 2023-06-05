@@ -37,7 +37,7 @@ public class paymentsController {
 
     @Operation(summary = "포인트 충전 요청하기", description = "결제", tags = {"결제"})
     @PostMapping("/approve")
-    public SseEmitter purchaseApprove(@RequestBody RequestApprove requestApprove) {
+    public ResponseEntity<SseEmitter> purchaseApprove(@RequestBody RequestApprove requestApprove) {
         return paymentsService.approve(requestApprove);
     }
 
@@ -50,7 +50,7 @@ public class paymentsController {
 
     @Operation(summary = "에피소드 구매(100원)", description = "결제", tags = {"결제"})
     @PostMapping("/purchase")
-    public SseEmitter purchaseEpisode(@RequestBody RequestPurchase requestPurchase) {
+    public ResponseEntity<SseEmitter> purchaseEpisode(@RequestBody RequestPurchase requestPurchase) {
         return paymentsService.purchase(requestPurchase);
     }
 
