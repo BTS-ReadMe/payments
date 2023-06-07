@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.readme.payments.payments.messageQueue.producer.ChargePointProducer;
+import com.readme.payments.payments.messageQueue.producer.GetPurchasedInfoProducer;
 import com.readme.payments.payments.messageQueue.producer.PurchaseEpisodeProducer;
 import com.readme.payments.payments.model.ChargeRecord;
+import com.readme.payments.payments.model.PurchaseRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.requestObject.RequestPurchase;
 import com.readme.payments.payments.repository.ChargeRepository;
@@ -42,6 +44,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final PurchaseRepository purchaseRepository;
     private final ChargePointProducer chargePointProducer;
     private final PurchaseEpisodeProducer purchaseEpisodeProducer;
+    private final GetPurchasedInfoProducer getPurchasedInfoProducer;
 
     @Value("${payment.key.cid}")
     private String CID;
@@ -203,6 +206,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         message.setData(responseCheckPurchased);
 
         return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+
+    @Override
+    public ResponseEntity<SseEmitter> getAllPurchased(String uuid) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+            getPurchasedInfoProducer.sendPurchasedInfo(uuid));
     }
 
 

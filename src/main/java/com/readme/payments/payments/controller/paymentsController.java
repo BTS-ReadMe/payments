@@ -56,9 +56,16 @@ public class paymentsController {
 
     @Operation(summary = "에피소드 구매 확인", description = "에피소드 결제했는지 확인", tags = {"결제"})
     @GetMapping("/checkPurchased")
-    public ResponseEntity<Message<ResponseCheckPurchased>> purchaseEpisode(
+    public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(
         @RequestHeader(value = "uuid") String uuid,
         @RequestParam Long episodeId) {
         return paymentsService.checkPurchased(uuid, episodeId);
+    }
+
+    @Operation(summary = "에피소드 구매 전체 조회", description = "에피소드 구매 내역 확인", tags = {"결제"})
+    @GetMapping("/getAllPurchased")
+    public ResponseEntity<SseEmitter> getAllPurchased(
+        @RequestHeader(value = "uuid") String uuid) {
+        return paymentsService.getAllPurchased(uuid);
     }
 }

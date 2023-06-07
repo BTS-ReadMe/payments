@@ -2,7 +2,6 @@ package com.readme.payments.payments.responseObject;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class ResponseGetChargeHistory {
