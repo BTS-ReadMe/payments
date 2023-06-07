@@ -22,4 +22,6 @@ public interface PaymentsService {
     public ResponseEntity<Message<List<ResponseGetChargeHistory>>> getAllChargeHistory(String uuid);
 
     public ResponseEntity<Message<ResponseCheckPurchased>> checkPurchased(String uuid, Long episodeId);
+
+    public ResponseEntity<SseEmitter> getAllPurchased(String uuid);
 }
