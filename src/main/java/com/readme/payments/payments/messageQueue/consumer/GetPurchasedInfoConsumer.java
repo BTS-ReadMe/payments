@@ -2,14 +2,15 @@ package com.readme.payments.payments.messageQueue.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.readme.payments.payments.dto.EpisodeNovelDto;
 import com.readme.payments.payments.dto.GetPurchasedInfoResultDto;
-import com.readme.payments.payments.dto.GetPurchasedInfoResultDto.Episode;
 import com.readme.payments.payments.model.PurchaseRecord;
 import com.readme.payments.payments.repository.PurchaseRepository;
 import com.readme.payments.payments.responseObject.ResponseGetPurchasedInfo;
 import com.readme.payments.sseEmitter.repository.SseEmitterRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class GetPurchasedInfoConsumer {
     public void listen(String kafkaMessage) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        List<ResponseGetPurchasedInfo> responseGetPurchasedInfos = null;
+        List<ResponseGetPurchasedInfo> responseGetPurchasedInfos = new ArrayList<>();
 
         GetPurchasedInfoResultDto result = mapper.readValue(kafkaMessage,
             GetPurchasedInfoResultDto.class);
@@ -43,16 +44,15 @@ public class GetPurchasedInfoConsumer {
                 .map(PurchaseRecord::getCreateDate).collect(Collectors.toList());
 
             int index = 0;
-            for (Episode episode : result.getPurchased()) {
-                responseGetPurchasedInfos.add(
-                    ResponseGetPurchasedInfo.builder()
-                        .novelId(episode.getNovelId())
-                        .novelTitle(episode.getNovelTitle())
-                        .grade(episode.getGrade())
-                        .thumbnail(episode.getThumbnail())
-                        .episodeTitle(episode.getEpisodeTitle())
-                        .purchasedDate(purchasedDate.get(index))
-                        .build());
+            for (EpisodeNovelDto episodeNovelDto : result.getPurchased()) {
+                responseGetPurchasedInfos.add(ResponseGetPurchasedInfo.builder()
+                    .novelId(episodeNovelDto.getNovelId())
+                    .novelTitle(episodeNovelDto.getNovelTitle())
+                    .grade(episodeNovelDto.getGrade())
+                    .thumbnail(episodeNovelDto.getThumbnail())
+                    .episodeTitle(episodeNovelDto.getEpisodeTitle())
+                    .purchasedDate(purchasedDate.get(index))
+                    .build());
                 index += 1;
             }
 

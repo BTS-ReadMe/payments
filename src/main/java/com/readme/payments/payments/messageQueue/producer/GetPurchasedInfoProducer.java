@@ -26,7 +26,7 @@ public class GetPurchasedInfoProducer {
 
         SseEmitter emitter = new SseEmitter();
         ObjectMapper mapper = new ObjectMapper();
-        String id = uuid + System.currentTimeMillis();
+        String id = uuid + "_" + System.currentTimeMillis();
 
         List<PurchaseRecord> records = purchaseRepository.findAllByUuid(uuid);
         List<Long> episodeIds = records.stream().map(PurchaseRecord::getEpisodeId)
