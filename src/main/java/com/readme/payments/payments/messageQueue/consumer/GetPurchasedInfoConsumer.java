@@ -11,6 +11,8 @@ import com.readme.payments.sseEmitter.repository.SseEmitterRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +42,6 @@ public class GetPurchasedInfoConsumer {
         if (emitter != null) {
             List<PurchaseRecord> list = purchaseRepository.findAllByUuid(
                 result.getId().split("_")[0]);
-            List<LocalDateTime> purchasedDate = list.stream()
-                .map(PurchaseRecord::getCreateDate).collect(Collectors.toList());
 
             int index = 0;
             for (EpisodeNovelDto episodeNovelDto : result.getPurchased()) {
@@ -51,10 +51,14 @@ public class GetPurchasedInfoConsumer {
                     .grade(episodeNovelDto.getGrade())
                     .thumbnail(episodeNovelDto.getThumbnail())
                     .episodeTitle(episodeNovelDto.getEpisodeTitle())
-                    .purchasedDate(purchasedDate.get(index))
+                    .purchasedDate(list.get(index).getCreateDate())
+                    .purchasedId(list.get(index).getId())
                     .build());
                 index += 1;
             }
+
+            Comparator<ResponseGetPurchasedInfo> comparator = Comparator.comparingLong(ResponseGetPurchasedInfo::getPurchasedId).reversed();
+            Collections.sort(responseGetPurchasedInfos, comparator);
 
             String jsonMessage = mapper.writeValueAsString(responseGetPurchasedInfos);
             emitter.send(SseEmitter.event().data(jsonMessage).name("PurchasedInfoResult"));
