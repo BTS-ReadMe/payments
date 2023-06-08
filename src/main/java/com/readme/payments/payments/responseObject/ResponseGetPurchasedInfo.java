@@ -14,4 +14,6 @@ public class ResponseGetPurchasedInfo {
     String thumbnail;
     String episodeTitle;
     LocalDateTime purchasedDate;
+
+    Long purchasedId;
 }
